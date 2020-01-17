@@ -30,3 +30,7 @@ const (
 	ErrMsg_RequestFormatError    = "request format error: %s"
 	ErrMsg_RequestTypeNotSupport = "request type(%v) not support"
 )
+
+const (
+	UDS_PATH = "/tmp/goex.market.center"
+)

@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"github.com/goex-top/market_center/api"
+	"github.com/goex-top/market_center/config"
+	"github.com/goex-top/market_center/data"
 	"io"
 	"log"
-	"market_center/api"
-	"market_center/config"
-	"market_center/data"
 	"net"
 	"os"
 	"os/signal"

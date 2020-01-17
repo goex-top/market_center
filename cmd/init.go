@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"market_center/api"
-	"market_center/config"
-	"market_center/data"
+	"github.com/goex-top/market_center/api"
+	"github.com/goex-top/market_center/config"
+	"github.com/goex-top/market_center/data"
 	"os"
 	"runtime"
 	"strconv"
@@ -13,7 +13,7 @@ import (
 
 // AdjustGoMaxProcs adjusts the maximum processes that the CPU can handle.
 func AdjustGoMaxProcs() {
-	fmt.Println("Adjusting bot runtime performance..")
+	fmt.Println("Adjusting runtime performance..")
 	maxProcsEnv := os.Getenv("GOMAXPROCS")
 	maxProcs := runtime.NumCPU()
 	fmt.Println("Number of CPU's detected:", maxProcs)

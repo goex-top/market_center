@@ -2,8 +2,8 @@ package data
 
 import (
 	"fmt"
+	. "github.com/goex-top/market_center"
 	goex "github.com/nntaoli-project/GoEx"
-	. "market_center"
 	"sync"
 )
 

@@ -1,4 +1,4 @@
-module market_center
+module github.com/goex-top/market_center
 
 go 1.13
 

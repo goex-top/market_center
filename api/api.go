@@ -3,10 +3,10 @@ package api
 import (
 	"context"
 	"fmt"
-	. "market_center"
-	"market_center/config"
-	"market_center/data"
-	"market_center/worker"
+	. "github.com/goex-top/market_center"
+	"github.com/goex-top/market_center/config"
+	"github.com/goex-top/market_center/data"
+	"github.com/goex-top/market_center/worker"
 )
 
 type Api struct {
