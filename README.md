@@ -1,6 +1,9 @@
 # Market Center
 a center to collect market data and distribute it over UDS(Unix Domain Sockets)
 
+## NOT Support Windows
+
+
 ## Why UDS
 ### benchmark compare between USD and TCP/IP loopback
 

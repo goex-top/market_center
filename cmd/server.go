@@ -1,12 +1,23 @@
 package main
 
 import (
+	"context"
 	"io"
 	"log"
+	"market_center/api"
+	"market_center/config"
+	"market_center/data"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+)
+
+var (
+	Api  *api.Api
+	Ctx  context.Context
+	Cfg  *config.Config
+	Data *data.Data
 )
 
 func HandleConn(c net.Conn) {
@@ -16,7 +27,7 @@ func HandleConn(c net.Conn) {
 		count, err := c.Read(buf)
 		received = append(received, buf[:count]...)
 		if err != nil {
-			ProcessMessage(received)
+			ProcessMessage(c, received)
 			if err != io.EOF {
 				log.Printf("Error on read: %s", err)
 			}
