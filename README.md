@@ -1,5 +1,5 @@
 # Market Center
-a center to collect market data and distribute it over UDS(Unix Domain Sockets)
+a center to collect market data from cryptocurrency exchanges and distribute it over UDS(Unix Domain Sockets) using [GoEx](https://github.com/nntaoli-project/GoEx)
 
 ## NOT Support Windows
 
