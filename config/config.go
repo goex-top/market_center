@@ -3,6 +3,7 @@ package config
 import (
 	goex "github.com/nntaoli-project/GoEx"
 	"github.com/nntaoli-project/GoEx/builder"
+	"os"
 	"time"
 )
 
@@ -33,11 +34,12 @@ func NewConfig() *Config {
 }
 
 func (c *Config) AddConfig(exchange, pair string, period int64) *ExchangeConfig {
+	proxy := os.Getenv("HTTP_PROXY")
 	c.ExchangesConfig = append(c.ExchangesConfig, ExchangeConfig{
 		ExchangName: exchange,
 		Pair: []PairConfig{
 			{
-				Api:    builder.NewAPIBuilder().Build(exchange),
+				Api:    builder.NewAPIBuilder().HttpProxy(proxy).Build(exchange),
 				Pair:   goex.NewCurrencyPair2(pair),
 				Period: time.Duration(period * int64(time.Millisecond)),
 				Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),

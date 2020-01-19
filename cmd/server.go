@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	. "github.com/goex-top/market_center"
 	"github.com/goex-top/market_center/api"
 	"github.com/goex-top/market_center/config"
 	"github.com/goex-top/market_center/data"
@@ -21,27 +23,29 @@ var (
 )
 
 func HandleConn(c net.Conn) {
-	received := make([]byte, 0)
 	for {
-		buf := make([]byte, 512)
-		count, err := c.Read(buf)
-		received = append(received, buf[:count]...)
+		buf := make([]byte, 1024)
+		count, err := c.Read(buf[:])
 		if err != nil {
-			ProcessMessage(c, received)
+			fmt.Println("err:", err)
 			if err != io.EOF {
-				log.Printf("Error on read: %s", err)
+				fmt.Errorf("Error on read: %s", err.Error())
 			}
-			break
+			return
+		} else if count > 0 {
+			ProcessMessage(c, buf[:count])
 		}
 	}
 }
 
 func main() {
+	os.Remove(UDS_PATH)
 	log.Println("Starting USD server")
-	ln, err := net.Listen("unix", "/tmp/goex.market.center")
+	ln, err := net.Listen("unix", UDS_PATH)
 	if err != nil {
 		log.Fatal("Listen error: ", err)
 	}
+	defer os.Remove(UDS_PATH)
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)

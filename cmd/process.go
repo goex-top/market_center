@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	. "github.com/goex-top/market_center"
 	"net"
@@ -19,12 +20,13 @@ func SendRespMsg(c net.Conn, rsp *Response) {
 	c.Write([]byte(r))
 }
 
-func ProcessMessage(c net.Conn, msg []byte) {
+func ProcessMessage(c net.Conn, msg []byte) error {
 	var req Request
 	err := json.Unmarshal(msg, &req)
+	fmt.Println("ProcessMessage:", string(msg))
 	if err != nil {
 		SendErrorMsg(c, -1, fmt.Sprintf(ErrMsg_RequestFormatError, err.Error()))
-		return
+		return err
 	}
 
 	rsp := &Response{}
@@ -42,8 +44,9 @@ func ProcessMessage(c net.Conn, msg []byte) {
 		rsp = Api.GetTicker(req.ExchangeName, req.CurrencyPair)
 	default:
 		SendErrorMsg(c, -1, fmt.Sprintf(ErrMsg_RequestTypeNotSupport, req.Type))
-		return
+		return errors.New(fmt.Sprintf(ErrMsg_RequestTypeNotSupport, req.Type))
 	}
 
 	SendRespMsg(c, rsp)
+	return nil
 }
