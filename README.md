@@ -1,7 +1,17 @@
 # Market Center
-a center to collect market data from cryptocurrency exchanges and distribute it over UDS(Unix Domain Sockets) using [GoEx](https://github.com/nntaoli-project/GoEx)
+A center to collect market data from cryptocurrency exchanges and distribute it over UDS(Unix Domain Sockets) using [GoEx](https://github.com/nntaoli-project/GoEx)
 
 ## NOT Support Windows
+
+## Why market center
+Some exchanges has limitation for rest api, limit access frequency by IP or Account.
+
+Usually we start some strategies in one server(description followed), Exchange 2 maybe ban your server IP because too many request.
+
+![trandition](trandition.png)
+
+So we could use a market center as a router to avoid limitation(description followed)
+![market_center](market_center.png)
 
 
 ## Why UDS
