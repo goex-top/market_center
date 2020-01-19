@@ -27,10 +27,12 @@ for Inter-process Communication
 
 ## APIs
 
-* SubcribeTicker
-* SubcribeDepth
+* SubscribeTicker
+* SubscribeDepth
+* SubscribeTrade
 * GetTicker
 * GetDepth
+* GetTrade
 
 ## Client
 

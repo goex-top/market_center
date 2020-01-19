@@ -1,10 +1,13 @@
 package config
 
 import (
-	goex "github.com/nntaoli-project/GoEx"
-	"github.com/nntaoli-project/GoEx/builder"
+	. "github.com/goex-top/market_center"
+	"log"
 	"os"
 	"time"
+
+	goex "github.com/nntaoli-project/GoEx"
+	"github.com/nntaoli-project/GoEx/builder"
 )
 
 //type Worker struct {
@@ -18,6 +21,7 @@ type PairConfig struct {
 	Pair   goex.CurrencyPair
 	Ticker *time.Ticker
 	Period time.Duration
+	Flag   DataFlag
 }
 
 type ExchangeConfig struct {
@@ -33,8 +37,11 @@ func NewConfig() *Config {
 	return &Config{ExchangesConfig: make([]ExchangeConfig, 0)}
 }
 
-func (c *Config) AddConfig(exchange, pair string, period int64) *ExchangeConfig {
+func (c *Config) AddConfig(exchange, pair string, period int64, flag DataFlag) *ExchangeConfig {
 	proxy := os.Getenv("HTTP_PROXY")
+	if proxy != "" {
+		log.Printf("add config with proxy:%s", proxy)
+	}
 	c.ExchangesConfig = append(c.ExchangesConfig, ExchangeConfig{
 		ExchangName: exchange,
 		Pair: []PairConfig{
@@ -43,17 +50,18 @@ func (c *Config) AddConfig(exchange, pair string, period int64) *ExchangeConfig 
 				Pair:   goex.NewCurrencyPair2(pair),
 				Period: time.Duration(period * int64(time.Millisecond)),
 				Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),
+				Flag:   flag,
 			},
 		},
 	})
 	return &c.ExchangesConfig[len(c.ExchangesConfig)-1]
 }
 
-func (c *Config) FindConfig(exchange, pair string, period int64) *PairConfig {
+func (c *Config) FindConfig(exchange, pair string, period int64, flag DataFlag) *PairConfig {
 	for k, ex := range c.ExchangesConfig {
 		if ex.ExchangName == exchange {
 			for kk, p := range ex.Pair {
-				if p.Pair.String() == pair {
+				if p.Pair.String() == pair && p.Flag == flag {
 					return &c.ExchangesConfig[k].Pair[kk]
 				}
 			}
@@ -64,6 +72,8 @@ func (c *Config) FindConfig(exchange, pair string, period int64) *PairConfig {
 
 func (c *PairConfig) UpdatePeriod(period int64) {
 	if period*int64(time.Millisecond) < int64(c.Period) && period > 0 {
+		log.Printf("update period from %dms to %dms", c.Period, period)
+
 		c.Ticker.Stop()
 		c.Ticker = time.NewTicker(time.Duration(period * int64(time.Millisecond)))
 		c.Period = time.Duration(period * int64(time.Millisecond))

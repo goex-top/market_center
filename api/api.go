@@ -7,19 +7,26 @@ import (
 	"github.com/goex-top/market_center/config"
 	"github.com/goex-top/market_center/data"
 	"github.com/goex-top/market_center/worker"
+	log "github.com/sirupsen/logrus"
 )
 
 type Api struct {
-	ctx  context.Context
-	cfg  *config.Config
-	data *data.Data
+	ctx    context.Context
+	cfg    *config.Config
+	data   *data.Data
+	logger *log.Logger
 }
 
 func NewApi(ctx context.Context, cfg *config.Config, data *data.Data) *Api {
-	return &Api{ctx: ctx, cfg: cfg, data: data}
+	return &Api{ctx: ctx, cfg: cfg, data: data, logger: log.New()}
+}
+
+func (a *Api) EnableDebug() {
+	a.logger.SetLevel(log.DebugLevel)
 }
 
 func (a *Api) GetSupportList() *Response {
+	a.logger.Debugln("GetSupportList")
 	return &Response{
 		Status: 0,
 		Data:   SupportList,
@@ -27,6 +34,8 @@ func (a *Api) GetSupportList() *Response {
 }
 
 func (a *Api) GetDepth(exchange, pair string) *Response {
+	a.logger.Debugf("GetDepth %s %s", exchange, pair)
+
 	if !validate(exchange) {
 		return &Response{
 			Status:       -1,
@@ -47,6 +56,7 @@ func (a *Api) GetDepth(exchange, pair string) *Response {
 }
 
 func (a *Api) GetTicker(exchange, pair string) *Response {
+	a.logger.Debugf("GetTicker %s %s", exchange, pair)
 	if !validate(exchange) {
 		return &Response{
 			Status:       -1,
@@ -66,18 +76,30 @@ func (a *Api) GetTicker(exchange, pair string) *Response {
 	}
 }
 
-func (a *Api) SubscribeDepth(exchange, pair string, period int64) *Response {
+func (a *Api) GetTrade(exchange, pair string) *Response {
+	a.logger.Debugf("GetTicker %s %s", exchange, pair)
 	if !validate(exchange) {
 		return &Response{
 			Status:       -1,
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
-	exc := a.cfg.FindConfig(exchange, pair, period)
+	panic("not support yet")
+}
+
+func (a *Api) SubscribeDepth(exchange, pair string, period int64) *Response {
+	a.logger.Infof("SubscribeDepth %s %s %d", exchange, pair, period)
+	if !validate(exchange) {
+		return &Response{
+			Status:       -1,
+			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
+		}
+	}
+	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Depth)
 	if exc != nil {
 		exc.UpdatePeriod(period)
 	} else {
-		cfg := a.cfg.AddConfig(exchange, pair, period)
+		cfg := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
 		go worker.NewDepthWorker(a.ctx, a.data, cfg.Pair[0].Api, cfg.Pair[0].Pair, cfg.Pair[0].Ticker)
 	}
 	return &Response{
@@ -86,22 +108,34 @@ func (a *Api) SubscribeDepth(exchange, pair string, period int64) *Response {
 }
 
 func (a *Api) SubscribeTicker(exchange, pair string, period int64) *Response {
+	a.logger.Infof("SubscribeTicker %s %s %d", exchange, pair, period)
 	if !validate(exchange) {
 		return &Response{
 			Status:       -1,
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
-	exc := a.cfg.FindConfig(exchange, pair, period)
+	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Ticker)
 	if exc != nil {
 		exc.UpdatePeriod(period)
 	} else {
-		cfg := a.cfg.AddConfig(exchange, pair, period)
+		cfg := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
 		go worker.NewTickerWorker(a.ctx, a.data, cfg.Pair[0].Api, cfg.Pair[0].Pair, cfg.Pair[0].Ticker)
 	}
 	return &Response{
 		Status: 0,
 	}
+}
+
+func (a *Api) SubscribeTrade(exchange, pair string, period int64) *Response {
+	a.logger.Infof("SubscribeTicker %s %s %d", exchange, pair, period)
+	if !validate(exchange) {
+		return &Response{
+			Status:       -1,
+			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
+		}
+	}
+	panic("not support yet")
 }
 
 func validate(exchangeName string) bool {

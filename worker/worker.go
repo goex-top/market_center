@@ -13,6 +13,8 @@ const (
 )
 
 func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pair goex.CurrencyPair, ticker *time.Ticker) {
+	log.Printf("new depth worker for [%s] %s ", api.GetExchangeName(), pair.String())
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -22,13 +24,13 @@ func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pai
 			if err != nil {
 				log.Printf("[%s] refresh depth error:%s", api.GetExchangeName(), err.Error())
 			}
-			log.Println(dep)
 			depthData.UpdateDepth(api.GetExchangeName(), pair.String(), dep)
 		}
 	}
 }
 
 func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, pair goex.CurrencyPair, ticker *time.Ticker) {
+	log.Printf("new ticker worker for [%s] %s ", api.GetExchangeName(), pair.String())
 	for {
 		select {
 		case <-ctx.Done():
@@ -38,7 +40,6 @@ func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, p
 			if err != nil {
 				log.Printf("[%s] refresh ticker error:%s", api.GetExchangeName(), err.Error())
 			}
-			log.Println(tick)
 			tickerData.UpdateTicker(api.GetExchangeName(), pair.String(), tick)
 		}
 	}

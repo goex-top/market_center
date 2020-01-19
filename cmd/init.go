@@ -39,4 +39,5 @@ func init() {
 	Cfg = config.NewConfig()
 	Data = data.NewData()
 	Api = api.NewApi(Ctx, Cfg, Data)
+	Api.EnableDebug()
 }

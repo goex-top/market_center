@@ -34,3 +34,12 @@ const (
 const (
 	UDS_PATH = "/tmp/goex.market.center"
 )
+
+type DataFlag int
+
+const (
+	DataFlag_Depth DataFlag = 1 << iota
+	DataFlag_Ticker
+
+	DataFlag_All = DataFlag_Depth | DataFlag_Ticker
+)
