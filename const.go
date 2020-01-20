@@ -40,6 +40,8 @@ type DataFlag int
 const (
 	DataFlag_Depth DataFlag = 1 << iota
 	DataFlag_Ticker
+	DataFlag_Trade
+	DataFlag_Kline
 
-	DataFlag_All = DataFlag_Depth | DataFlag_Ticker
+	DataFlag_All = DataFlag_Depth | DataFlag_Ticker | DataFlag_Trade | DataFlag_Kline
 )
