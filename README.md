@@ -17,7 +17,7 @@ So we could use a market center as a router to avoid limitation(description foll
 ## APIs
 
 Ref to [Client](https://github.com/goex-top/market_center_client)
- 
+
 params
 - exchangeName: exchange name, ref to [Supports](#support-exchanges)
 - currencyPair: currency pair, format with `_`, like `BTC_USDT`
@@ -50,10 +50,17 @@ params
 * big.one
 * hitbtc.com
 
+## Proxy
+
+center will get proxy setting from system environment, key word is `HTTP_PROXY`. if you want to use proxy for center, `set HTTP_PROXY=socks5://127.0.0.1:1080` or `export HTTP_PROXY=socks5://127.0.0.1:1080`
+ 
 ## Client
 
+golang client 
 [https://github.com/goex-top/market_center_client](https://github.com/goex-top/market_center_client)
 
+fmz js client
+[https://github.com/goex-top/market_center_client_fmz](https://github.com/goex-top/market_center_client_fmz)
 
 ## Why UDS
 ### benchmark compare between USD and TCP/IP loopback

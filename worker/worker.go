@@ -8,9 +8,17 @@ import (
 	"time"
 )
 
-const (
-	defaultDepthSize = 10
+var (
+	defaultDepthSize = 20
 )
+
+func SetDefaultDepthSize(size int) {
+	defaultDepthSize = size
+}
+
+func GetDefaultDepthSize() int {
+	return defaultDepthSize
+}
 
 func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pair goex.CurrencyPair, ticker *time.Ticker) {
 	log.Printf("new depth worker for [%s] %s ", api.GetExchangeName(), pair.String())
@@ -24,6 +32,7 @@ func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pai
 			if err != nil {
 				log.Printf("[%s] refresh depth error:%s", api.GetExchangeName(), err.Error())
 			}
+			//log.Println("DEPTH:", dep)
 			depthData.UpdateDepth(api.GetExchangeName(), pair.String(), dep)
 		}
 	}
@@ -40,6 +49,7 @@ func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, p
 			if err != nil {
 				log.Printf("[%s] refresh ticker error:%s", api.GetExchangeName(), err.Error())
 			}
+			//log.Println("TICKER:", tick)
 			tickerData.UpdateTicker(api.GetExchangeName(), pair.String(), tick)
 		}
 	}
