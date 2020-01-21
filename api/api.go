@@ -100,12 +100,12 @@ func (a *Api) SubscribeDepth(exchange, pair string, period int64) *Response {
 		if exc.UpdatePeriod(period) {
 			exc.CancelFunc()
 			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewTickerWorker(exc.Ctx, a.data, exc.Api, exc.Pair, exc.Period)
+			go worker.NewTickerWorker(exc.Ctx, a.data, exc.Api, exchange, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
 		if c != nil {
-			go worker.NewDepthWorker(a.ctx, a.data, c.Api, c.Pair, c.Period)
+			go worker.NewDepthWorker(a.ctx, a.data, c.Api, exchange, c.Pair, c.Period)
 		}
 	}
 	return &Response{
@@ -126,13 +126,13 @@ func (a *Api) SubscribeTicker(exchange, pair string, period int64) *Response {
 		if exc.UpdatePeriod(period) {
 			exc.CancelFunc()
 			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewTickerWorker(exc.Ctx, a.data, exc.Api, exc.Pair, exc.Period)
+			go worker.NewTickerWorker(exc.Ctx, a.data, exc.Api, exchange, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Ticker)
 		if c != nil {
 			c.Ctx, c.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewTickerWorker(c.Ctx, a.data, c.Api, c.Pair, c.Period)
+			go worker.NewTickerWorker(c.Ctx, a.data, c.Api, exchange, c.Pair, c.Period)
 		}
 	}
 	return &Response{

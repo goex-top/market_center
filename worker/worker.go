@@ -20,8 +20,8 @@ func GetDefaultDepthSize() int {
 	return defaultDepthSize
 }
 
-func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pair goex.CurrencyPair, period time.Duration) {
-	log.Printf("new depth worker for [%s] %s, period is %dms", api.GetExchangeName(), pair.String(), period/time.Millisecond)
+func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, exchange string, pair goex.CurrencyPair, period time.Duration) {
+	log.Printf("new depth worker for [%s] %s, period is %dms", exchange, pair.String(), period/time.Millisecond)
 	ticker := time.NewTicker(period)
 
 	for {
@@ -31,16 +31,16 @@ func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pai
 		case <-ticker.C:
 			dep, err := api.GetDepth(defaultDepthSize, pair)
 			if err != nil {
-				log.Printf("[%s] refresh depth error:%s", api.GetExchangeName(), err.Error())
+				log.Printf("[%s] refresh depth error:%s", exchange, err.Error())
 			}
 			//log.Println("DEPTH:", dep)
-			depthData.UpdateDepth(api.GetExchangeName(), pair.String(), dep)
+			depthData.UpdateDepth(exchange, pair.String(), dep)
 		}
 	}
 }
 
-func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, pair goex.CurrencyPair, period time.Duration) {
-	log.Printf("new ticker worker for [%s] %s, period is %dms ", api.GetExchangeName(), pair.String(), period/time.Millisecond)
+func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, exchange string, pair goex.CurrencyPair, period time.Duration) {
+	log.Printf("new ticker worker for [%s] %s, period is %dms ", exchange, pair.String(), period/time.Millisecond)
 	ticker := time.NewTicker(period)
 	for {
 		select {
@@ -49,10 +49,10 @@ func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, p
 		case <-ticker.C:
 			tick, err := api.GetTicker(pair)
 			if err != nil {
-				log.Printf("[%s] refresh ticker error:%s", api.GetExchangeName(), err.Error())
+				log.Printf("[%s] refresh ticker error:%s", exchange, err.Error())
 			}
 			//log.Println("TICKER:", tick)
-			tickerData.UpdateTicker(api.GetExchangeName(), pair.String(), tick)
+			tickerData.UpdateTicker(exchange, pair.String(), tick)
 		}
 	}
 }
