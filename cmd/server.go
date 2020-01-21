@@ -40,12 +40,12 @@ func HandleConn(c net.Conn) {
 
 func main() {
 	os.Remove(UDS_PATH)
-	log.Println("Starting USD server")
 	ln, err := net.Listen("unix", UDS_PATH)
 	if err != nil {
 		log.Fatal("Listen error: ", err)
 	}
 	defer os.Remove(UDS_PATH)
+	log.Printf("Starting USD server:%s", UDS_PATH)
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
