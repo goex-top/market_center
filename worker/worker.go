@@ -20,8 +20,9 @@ func GetDefaultDepthSize() int {
 	return defaultDepthSize
 }
 
-func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pair goex.CurrencyPair, ticker *time.Ticker) {
-	log.Printf("new depth worker for [%s] %s ", api.GetExchangeName(), pair.String())
+func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pair goex.CurrencyPair, period time.Duration) {
+	log.Printf("new depth worker for [%s] %s, period is %dms", api.GetExchangeName(), pair.String(), period/time.Millisecond)
+	ticker := time.NewTicker(period)
 
 	for {
 		select {
@@ -38,8 +39,9 @@ func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, pai
 	}
 }
 
-func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, pair goex.CurrencyPair, ticker *time.Ticker) {
-	log.Printf("new ticker worker for [%s] %s ", api.GetExchangeName(), pair.String())
+func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, pair goex.CurrencyPair, period time.Duration) {
+	log.Printf("new ticker worker for [%s] %s, period is %dms ", api.GetExchangeName(), pair.String(), period/time.Millisecond)
+	ticker := time.NewTicker(period)
 	for {
 		select {
 		case <-ctx.Done():

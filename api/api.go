@@ -97,10 +97,16 @@ func (a *Api) SubscribeDepth(exchange, pair string, period int64) *Response {
 	}
 	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Depth)
 	if exc != nil {
-		exc.UpdatePeriod(period)
+		if exc.UpdatePeriod(period) {
+			exc.CancelFunc()
+			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
+			go worker.NewTickerWorker(exc.Ctx, a.data, exc.Api, exc.Pair, exc.Period)
+		}
 	} else {
-		cfg := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
-		go worker.NewDepthWorker(a.ctx, a.data, cfg.Pair[0].Api, cfg.Pair[0].Pair, cfg.Pair[0].Ticker)
+		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
+		if c != nil {
+			go worker.NewDepthWorker(a.ctx, a.data, c.Api, c.Pair, c.Period)
+		}
 	}
 	return &Response{
 		Status: 0,
@@ -117,10 +123,17 @@ func (a *Api) SubscribeTicker(exchange, pair string, period int64) *Response {
 	}
 	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Ticker)
 	if exc != nil {
-		exc.UpdatePeriod(period)
+		if exc.UpdatePeriod(period) {
+			exc.CancelFunc()
+			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
+			go worker.NewTickerWorker(exc.Ctx, a.data, exc.Api, exc.Pair, exc.Period)
+		}
 	} else {
-		cfg := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
-		go worker.NewTickerWorker(a.ctx, a.data, cfg.Pair[0].Api, cfg.Pair[0].Pair, cfg.Pair[0].Ticker)
+		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Ticker)
+		if c != nil {
+			c.Ctx, c.CancelFunc = context.WithCancel(a.ctx)
+			go worker.NewTickerWorker(c.Ctx, a.data, c.Api, c.Pair, c.Period)
+		}
 	}
 	return &Response{
 		Status: 0,
@@ -128,7 +141,7 @@ func (a *Api) SubscribeTicker(exchange, pair string, period int64) *Response {
 }
 
 func (a *Api) SubscribeTrade(exchange, pair string, period int64) *Response {
-	a.logger.Infof("SubscribeTicker %s %s %d", exchange, pair, period)
+	a.logger.Infof("SubscribeTrade %s %s %d", exchange, pair, period)
 	if !validate(exchange) {
 		return &Response{
 			Status:       -1,
