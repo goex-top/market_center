@@ -5,6 +5,7 @@ import (
 	"github.com/goex-top/market_center/data"
 	goex "github.com/nntaoli-project/GoEx"
 	"log"
+	"sort"
 	"time"
 )
 
@@ -40,6 +41,12 @@ func NewSpotDepthWorker(ctx context.Context, depthData *data.Data, api goex.API,
 			if err != nil {
 				log.Printf("[%s] refresh %s depth error:%s", exchange, pair.String(), err.Error())
 			} else {
+				if dep.AskList[0].Price > dep.AskList[1].Price {
+					sort.Sort(dep.AskList)
+				}
+				if dep.BidList[0].Price < dep.BidList[1].Price {
+					sort.Sort(sort.Reverse(dep.AskList))
+				}
 				depthData.UpdateSpotDepth(exchange, pair.String(), dep)
 			}
 		}
@@ -92,6 +99,12 @@ func NewFutureDepthWorker(ctx context.Context, depthData *data.Data, api goex.Fu
 			if err != nil {
 				log.Printf("[%s] %s refresh %s depth error:%s", exchange, contactType, pair.String(), err.Error())
 			} else {
+				if dep.AskList[0].Price > dep.AskList[1].Price {
+					sort.Sort(dep.AskList)
+				}
+				if dep.BidList[0].Price < dep.BidList[1].Price {
+					sort.Sort(sort.Reverse(dep.AskList))
+				}
 				depthData.UpdateFutureDepth(exchange, contactType, pair.String(), dep)
 			}
 		}
