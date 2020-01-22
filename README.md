@@ -1,4 +1,6 @@
 # Market Center
+![HitCount](http://hits.dwyl.io/goex-top/market_center.svg)
+
 A center to collect market data from cryptocurrency exchanges and distribute it over UDS(Unix Domain Sockets) using [GoEx](https://github.com/nntaoli-project/GoEx), it design for multi-strategy in one server, especial hft(high frequency trading) 
 
 ## NOT Support Windows
@@ -87,3 +89,7 @@ for Inter-process Communication
 
 ## How UDS
 * [unix-domain-sockets-in-go](https://eli.thegreenplace.net/2019/unix-domain-sockets-in-go/)
+
+### 观星者
+
+![观星者](https://starchart.cc/goex-top/market_center.svg)
