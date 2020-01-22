@@ -200,12 +200,12 @@ func (a *Api) SubscribeFutureDepth(exchange, contractType, pair string, period i
 		if exc.UpdatePeriod(period) {
 			exc.CancelFunc()
 			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewFutureDepthWorker(exc.Ctx, a.data, exc.FutureApi, contractType, exchange, exc.Pair, exc.Period)
+			go worker.NewFutureDepthWorker(exc.Ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
 		if c != nil {
-			go worker.NewFutureDepthWorker(a.ctx, a.data, c.FutureApi, contractType, exchange, c.Pair, c.Period)
+			go worker.NewFutureDepthWorker(a.ctx, a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
 		}
 	}
 	return &Response{
@@ -226,13 +226,13 @@ func (a *Api) SubscribeFutureTicker(exchange, contractType, pair string, period 
 		if exc.UpdatePeriod(period) {
 			exc.CancelFunc()
 			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewFutureTickerWorker(exc.Ctx, a.data, exc.FutureApi, contractType, exchange, exc.Pair, exc.Period)
+			go worker.NewFutureTickerWorker(exc.Ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Ticker)
 		if c != nil {
 			c.Ctx, c.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewFutureTickerWorker(c.Ctx, a.data, c.FutureApi, contractType, exchange, c.Pair, c.Period)
+			go worker.NewFutureTickerWorker(c.Ctx, a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
 		}
 	}
 	return &Response{
