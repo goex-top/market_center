@@ -14,6 +14,7 @@ type Request struct {
 	Type         Type   `json:"type"`
 	ExchangeName string `json:"exchange_name"`
 	CurrencyPair string `json:"currency_pair"`
+	ContractType string `json:"contract_type",omitempty`
 	Period       int64  `json:"period",omitempty"` //unit: ms
 }
 

@@ -7,10 +7,14 @@ type Type int
 const (
 	_ Type = iota
 	Type_GetSupportList
-	Type_SubscribeDepth
-	Type_SubscribeTicker
-	Type_GetDepth
-	Type_GetTicker
+	Type_SubscribeSpotDepth
+	Type_SubscribeSpotTicker
+	Type_SubscribeFutureDepth
+	Type_SubscribeFutureTicker
+	Type_GetSpotDepth
+	Type_GetSpotTicker
+	Type_GetFutureDepth
+	Type_GetFutureTicker
 )
 
 func (t Type) String() string {
@@ -43,5 +47,5 @@ const (
 	DataFlag_Trade
 	DataFlag_Kline
 
-	DataFlag_All = DataFlag_Depth | DataFlag_Ticker | DataFlag_Trade | DataFlag_Kline
+	//DataFlag_All = DataFlag_Depth | DataFlag_Ticker | DataFlag_Trade | DataFlag_Kline
 )

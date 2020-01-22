@@ -18,7 +18,8 @@ import (
 //}
 
 type PairConfig struct {
-	Api        goex.API
+	SpotApi    goex.API
+	FutureApi  goex.FutureRestAPI
 	Pair       goex.CurrencyPair
 	Period     time.Duration
 	Flag       DataFlag
@@ -52,28 +53,57 @@ func (c *Config) AddConfig(exchange, pair string, period int64, flag DataFlag) *
 					return nil
 				}
 			}
-			c.ExchangesConfig[k].Pair = append(c.ExchangesConfig[k].Pair, PairConfig{
-				Api:    builder.NewAPIBuilder().HttpProxy(proxy).Build(exchange),
-				Pair:   goex.NewCurrencyPair2(pair),
-				Period: time.Duration(period * int64(time.Millisecond)),
-				Flag:   flag,
-				//Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),
-			})
+			if !IsFutureExchange(exchange) {
+				c.ExchangesConfig[k].Pair = append(c.ExchangesConfig[k].Pair, PairConfig{
+					SpotApi:   builder.NewAPIBuilder().HttpProxy(proxy).Build(exchange),
+					FutureApi: nil,
+					Pair:      goex.NewCurrencyPair2(pair),
+					Period:    time.Duration(period * int64(time.Millisecond)),
+					Flag:      flag,
+					//Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),
+				})
+			} else {
+				c.ExchangesConfig[k].Pair = append(c.ExchangesConfig[k].Pair, PairConfig{
+					FutureApi: builder.NewAPIBuilder().HttpProxy(proxy).BuildFuture(exchange),
+					SpotApi:   nil,
+					Pair:      goex.NewCurrencyPair2(pair),
+					Period:    time.Duration(period * int64(time.Millisecond)),
+					Flag:      flag,
+					//Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),
+				})
+			}
 			return &c.ExchangesConfig[k].Pair[len(c.ExchangesConfig[k].Pair)-1]
 		}
 	}
-	c.ExchangesConfig = append(c.ExchangesConfig, ExchangeConfig{
-		ExchangeName: exchange,
-		Pair: []PairConfig{
-			{
-				Api:    builder.NewAPIBuilder().HttpProxy(proxy).Build(exchange),
-				Pair:   goex.NewCurrencyPair2(pair),
-				Period: time.Duration(period * int64(time.Millisecond)),
-				Flag:   flag,
-				//Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),
+	if !IsFutureExchange(exchange) {
+		c.ExchangesConfig = append(c.ExchangesConfig, ExchangeConfig{
+			ExchangeName: exchange,
+			Pair: []PairConfig{
+				{
+					SpotApi:   builder.NewAPIBuilder().HttpProxy(proxy).Build(exchange),
+					FutureApi: nil,
+					Pair:      goex.NewCurrencyPair2(pair),
+					Period:    time.Duration(period * int64(time.Millisecond)),
+					Flag:      flag,
+					//Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),
+				},
 			},
-		},
-	})
+		})
+	} else {
+		c.ExchangesConfig = append(c.ExchangesConfig, ExchangeConfig{
+			ExchangeName: exchange,
+			Pair: []PairConfig{
+				{
+					FutureApi: builder.NewAPIBuilder().HttpProxy(proxy).BuildFuture(exchange),
+					SpotApi:   nil,
+					Pair:      goex.NewCurrencyPair2(pair),
+					Period:    time.Duration(period * int64(time.Millisecond)),
+					Flag:      flag,
+					//Ticker: time.NewTicker(time.Duration(period * int64(time.Millisecond))),
+				},
+			},
+		})
+	}
 	return &c.ExchangesConfig[len(c.ExchangesConfig)-1].Pair[0]
 }
 

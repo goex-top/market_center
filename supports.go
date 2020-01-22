@@ -3,15 +3,15 @@ package market_center
 import goex "github.com/nntaoli-project/GoEx"
 
 var (
-	//FutureList = []string{
-	//	goex.BITMEX,
-	//	goex.OKEX_FUTURE,
-	//	goex.OKEX_SWAP,
-	//	goex.HBDM,
-	//	goex.COINBENE,
-	//	goex.FMEX,
-	//}
-	SupportList = []string{
+	FutureList = []string{
+		goex.BITMEX,
+		goex.OKEX_FUTURE,
+		goex.OKEX_SWAP,
+		goex.HBDM,
+		goex.COINBENE,
+		goex.FMEX,
+	}
+	SpotList = []string{
 		goex.POLONIEX,
 		goex.BITSTAMP,
 		goex.HUOBI_PRO,
@@ -36,3 +36,12 @@ var (
 		//goex.FMEX,
 	}
 )
+
+func IsFutureExchange(exchangeName string) bool {
+	for _, v := range FutureList {
+		if exchangeName == v {
+			return true
+		}
+	}
+	return false
+}

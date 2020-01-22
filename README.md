@@ -22,17 +22,24 @@ params
 - exchangeName: exchange name, ref to [Supports](#support-exchanges)
 - currencyPair: currency pair, format with `_`, like `BTC_USDT`
 - period: market data update period, unit ms
+- contractType: future/swap contract type
 
-* SubscribeTicker(exchangeName, currencyPair, period) (error)
-* SubscribeDepth(exchangeName, currencyPair, period) (error)
-* SubscribeTrade(exchangeName, currencyPair, period) (error)
-* GetTicker(exchangeName, currencyPair) (*Ticker, error)
-* GetDepth(exchangeName, currencyPair) (*Depth, error)
-* GetTrade(exchangeName, currencyPair) (*Trade, error)
 * GetSupportList() []
+* SubscribeSpotTicker(exchangeName, currencyPair, period) (error)
+* SubscribeSpotDepth(exchangeName, currencyPair, period) (error)
+* ~~SubscribeSpotTrade(exchangeName, currencyPair) (error)~~
+* GetSpotTicker(exchangeName, currencyPair) (*Ticker, error)
+* GetSpotDepth(exchangeName, currencyPair) (*Depth, error)
+* ~~GetSpotTrade(exchangeName, currencyPair) (*Trade, error)~~
+* SubscribeFutureTicker(exchangeName, contractType, currencyPair, period) (error)
+* SubscribeFutureDepth(exchangeName, contractType, currencyPair, period) (error)
+* ~~SubscribeFutureTrade(exchangeName, contractType, currencyPair) (error)~~
+* GetFutureTicker(exchangeName, contractType, currencyPair) (*Ticker, error)
+* GetFutureDepth(exchangeName, contractType, currencyPair) (*Depth, error)
+* ~~GetFutureTrade(exchangeName, contractType, currencyPair) (*Trade, error)~~
 
 ## Support Exchanges
-
+### SPOT
 * poloniex.com
 * bitstamp.net
 * huobi.pro
@@ -49,6 +56,14 @@ params
 * fcoin.com_margin
 * big.one
 * hitbtc.com
+
+### FUTURE
+* bitmex.com
+* okex.com_future
+* okex.com_swap
+* hbdm.com
+* coinbene.com
+* fmex.com
 
 ## Proxy
 

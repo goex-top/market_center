@@ -20,7 +20,7 @@ func GetDefaultDepthSize() int {
 	return defaultDepthSize
 }
 
-func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, exchange string, pair goex.CurrencyPair, period time.Duration) {
+func NewSpotDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, exchange string, pair goex.CurrencyPair, period time.Duration) {
 	log.Printf("new depth worker for [%s] %s, period is %dms", exchange, pair.String(), period/time.Millisecond)
 	ticker := time.NewTicker(period)
 
@@ -31,15 +31,15 @@ func NewDepthWorker(ctx context.Context, depthData *data.Data, api goex.API, exc
 		case <-ticker.C:
 			dep, err := api.GetDepth(defaultDepthSize, pair)
 			if err != nil {
-				log.Printf("[%s] refresh depth error:%s", exchange, err.Error())
+				log.Printf("[%s] refresh %s depth error:%s", exchange, pair.String(), err.Error())
+			} else {
+				depthData.UpdateSpotDepth(exchange, pair.String(), dep)
 			}
-			//log.Println("DEPTH:", dep)
-			depthData.UpdateDepth(exchange, pair.String(), dep)
 		}
 	}
 }
 
-func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, exchange string, pair goex.CurrencyPair, period time.Duration) {
+func NewSpotTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, exchange string, pair goex.CurrencyPair, period time.Duration) {
 	log.Printf("new ticker worker for [%s] %s, period is %dms ", exchange, pair.String(), period/time.Millisecond)
 	ticker := time.NewTicker(period)
 	for {
@@ -49,10 +49,47 @@ func NewTickerWorker(ctx context.Context, tickerData *data.Data, api goex.API, e
 		case <-ticker.C:
 			tick, err := api.GetTicker(pair)
 			if err != nil {
-				log.Printf("[%s] refresh ticker error:%s", exchange, err.Error())
+				log.Printf("[%s] refresh %s ticker error:%s", exchange, pair.String(), err.Error())
+			} else {
+				tickerData.UpdateSpotTicker(exchange, pair.String(), tick)
 			}
-			//log.Println("TICKER:", tick)
-			tickerData.UpdateTicker(exchange, pair.String(), tick)
+		}
+	}
+}
+
+func NewFutureDepthWorker(ctx context.Context, depthData *data.Data, api goex.FutureRestAPI, exchange, contactType string, pair goex.CurrencyPair, period time.Duration) {
+	log.Printf("new depth worker for [%s] %s, period is %dms", exchange, pair.String(), period/time.Millisecond)
+	ticker := time.NewTicker(period)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			dep, err := api.GetFutureDepth(pair, contactType, defaultDepthSize)
+			if err != nil {
+				log.Printf("[%s] %s refresh %s depth error:%s", contactType, exchange, pair.String(), err.Error())
+			} else {
+				depthData.UpdateFutureDepth(exchange, contactType, pair.String(), dep)
+			}
+		}
+	}
+}
+
+func NewFutureTickerWorker(ctx context.Context, tickerData *data.Data, api goex.FutureRestAPI, exchange, contactType string, pair goex.CurrencyPair, period time.Duration) {
+	log.Printf("new ticker worker for [%s] %s, period is %dms ", exchange, pair.String(), period/time.Millisecond)
+	ticker := time.NewTicker(period)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			tick, err := api.GetFutureTicker(pair, contactType)
+			if err != nil {
+				log.Printf("[%s] %s refresh %s ticker error:%s", contactType, exchange, pair.String(), err.Error())
+			} else {
+				tickerData.UpdateFutureTicker(exchange, contactType, pair.String(), tick)
+			}
 		}
 	}
 }
