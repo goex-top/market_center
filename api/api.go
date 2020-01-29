@@ -90,7 +90,7 @@ func (a *Api) GetSpotTicker(exchange, pair string) *Response {
 }
 
 func (a *Api) SubscribeSpotDepth(exchange, pair string, period int64) *Response {
-	a.logger.Infof("SubscribeSpotDepth %s %s %d", exchange, pair, period)
+	a.logger.Infof("SubscribeSpotDepth %s %s %dms", exchange, pair, period)
 	if !validateSpot(exchange) {
 		return &Response{
 			Status:       -1,
@@ -105,9 +105,9 @@ func (a *Api) SubscribeSpotDepth(exchange, pair string, period int64) *Response 
 			go worker.NewSpotDepthWorker(exc.Ctx, a.data, exc.SpotApi, exchange, exc.Pair, exc.Period)
 		}
 	} else {
-		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
+		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Depth)
 		if c != nil {
-			go worker.NewSpotDepthWorker(a.ctx, a.data, c.SpotApi, exchange, c.Pair, c.Period)
+			go worker.NewSpotDepthWorker(c.Ctx, a.data, c.SpotApi, exchange, c.Pair, c.Period)
 		}
 	}
 	return &Response{
@@ -131,9 +131,8 @@ func (a *Api) SubscribeSpotTicker(exchange, pair string, period int64) *Response
 			go worker.NewSpotTickerWorker(exc.Ctx, a.data, exc.SpotApi, exchange, exc.Pair, exc.Period)
 		}
 	} else {
-		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Ticker)
+		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Ticker)
 		if c != nil {
-			c.Ctx, c.CancelFunc = context.WithCancel(a.ctx)
 			go worker.NewSpotTickerWorker(c.Ctx, a.data, c.SpotApi, exchange, c.Pair, c.Period)
 		}
 	}
@@ -203,9 +202,9 @@ func (a *Api) SubscribeFutureDepth(exchange, contractType, pair string, period i
 			go worker.NewFutureDepthWorker(exc.Ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
 		}
 	} else {
-		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Depth)
+		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Depth)
 		if c != nil {
-			go worker.NewFutureDepthWorker(a.ctx, a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
+			go worker.NewFutureDepthWorker(c.Ctx, a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
 		}
 	}
 	return &Response{
@@ -229,9 +228,8 @@ func (a *Api) SubscribeFutureTicker(exchange, contractType, pair string, period 
 			go worker.NewFutureTickerWorker(exc.Ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
 		}
 	} else {
-		c := a.cfg.AddConfig(exchange, pair, period, DataFlag_Ticker)
+		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Ticker)
 		if c != nil {
-			c.Ctx, c.CancelFunc = context.WithCancel(a.ctx)
 			go worker.NewFutureTickerWorker(c.Ctx, a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
 		}
 	}
