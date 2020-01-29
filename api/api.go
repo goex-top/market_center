@@ -47,7 +47,7 @@ func (a *Api) GetSupportList() *Response {
 // spot
 
 func (a *Api) GetSpotDepth(exchange, pair string) *Response {
-	a.logger.Debugf("GetDepth %s %s", exchange, pair)
+	a.logger.Debugf("GetSpotDepth %s %s", exchange, pair)
 
 	if !validateSpot(exchange) {
 		return &Response{
@@ -69,7 +69,7 @@ func (a *Api) GetSpotDepth(exchange, pair string) *Response {
 }
 
 func (a *Api) GetSpotTicker(exchange, pair string) *Response {
-	a.logger.Debugf("GetTicker %s %s", exchange, pair)
+	a.logger.Debugf("GetSpotTicker %s %s", exchange, pair)
 	if !validateSpot(exchange) {
 		return &Response{
 			Status:       -1,
@@ -144,7 +144,7 @@ func (a *Api) SubscribeSpotTicker(exchange, pair string, period int64) *Response
 // future
 
 func (a *Api) GetFutureDepth(exchange, contractType, pair string) *Response {
-	a.logger.Debugf("GetDepth %s %s", exchange, pair)
+	a.logger.Debugf("GetFutureDepth %s %s", exchange, pair)
 
 	if !validateFuture(exchange) {
 		return &Response{
@@ -166,7 +166,7 @@ func (a *Api) GetFutureDepth(exchange, contractType, pair string) *Response {
 }
 
 func (a *Api) GetFutureTicker(exchange, contractType, pair string) *Response {
-	a.logger.Debugf("GetTicker %s %s", exchange, pair)
+	a.logger.Debugf("GetFutureTicker %s %s", exchange, pair)
 	if !validateFuture(exchange) {
 		return &Response{
 			Status:       -1,

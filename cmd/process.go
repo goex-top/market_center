@@ -23,7 +23,7 @@ func SendRespMsg(c net.Conn, rsp *Response) {
 func ProcessMessage(c net.Conn, msg []byte) error {
 	var req Request
 	err := json.Unmarshal(msg, &req)
-	fmt.Println("ProcessMessage:", string(msg))
+	//fmt.Println("ProcessMessage:", string(msg))
 	if err != nil {
 		SendErrorMsg(c, -1, fmt.Sprintf(ErrMsg_RequestFormatError, err.Error()))
 		return err
