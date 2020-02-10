@@ -8,17 +8,21 @@ import (
 	"github.com/goex-top/market_center/data"
 	"github.com/goex-top/market_center/worker"
 	log "github.com/sirupsen/logrus"
+	"sync"
 )
 
 type Api struct {
-	ctx    context.Context
-	cfg    *config.Config
-	data   *data.Data
-	logger *log.Logger
+	ctx         context.Context
+	cfg         *config.Config
+	data        *data.Data
+	logger      *log.Logger
+	activeTimer sync.Map
 }
 
 func NewApi(ctx context.Context, cfg *config.Config, data *data.Data) *Api {
-	return &Api{ctx: ctx, cfg: cfg, data: data, logger: log.New()}
+	_api := &Api{ctx: ctx, cfg: cfg, data: data, logger: log.New(), activeTimer: sync.Map{}}
+	go _api.monitor()
+	return _api
 }
 
 func (a *Api) EnableDebug() {
@@ -33,21 +37,9 @@ func (a *Api) GetSupportList() *Response {
 	}
 }
 
-//func (a *Api) GetTrade(exchange, pair string) *Response {
-//	a.logger.Debugf("GetTicker %s %s", exchange, pair)
-//	if !validate(exchange) {
-//		return &Response{
-//			Status:       -1,
-//			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
-//		}
-//	}
-//	panic("not support yet")
-//}
-
 // spot
 
 func (a *Api) GetSpotDepth(exchange, pair string) *Response {
-	a.logger.Debugf("GetSpotDepth %s %s", exchange, pair)
 
 	if !validateSpot(exchange) {
 		return &Response{
@@ -55,13 +47,16 @@ func (a *Api) GetSpotDepth(exchange, pair string) *Response {
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
+	a.resetTimer(keyGen(exchange, pair, DataFlag_Depth))
 	depth, err := a.data.GetSpotDepth(exchange, pair)
 	if err != nil {
+		a.logger.Debugf("GetSpotDepth %s %s err:%v", exchange, pair, err)
 		return &Response{
 			Status:       -1,
 			ErrorMessage: err.Error(),
 		}
 	}
+	a.logger.Debugf("GetSpotDepth %s %s success", exchange, pair)
 	return &Response{
 		Status: 0,
 		Data:   depth,
@@ -76,13 +71,16 @@ func (a *Api) GetSpotTicker(exchange, pair string) *Response {
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
+	a.resetTimer(keyGen(exchange, pair, DataFlag_Ticker))
 	ticker, err := a.data.GetSpotTicker(exchange, pair)
 	if err != nil {
+		a.logger.Debugf("GetSpotTicker %s %s err:%v", exchange, pair, err)
 		return &Response{
 			Status:       -1,
 			ErrorMessage: err.Error(),
 		}
 	}
+	a.logger.Debugf("GetSpotTicker %s %s success", exchange, pair)
 	return &Response{
 		Status: 0,
 		Data:   ticker,
@@ -97,17 +95,18 @@ func (a *Api) SubscribeSpotDepth(exchange, pair string, period int64) *Response 
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
-	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Depth)
+	exc := a.cfg.FindConfig(exchange, pair, DataFlag_Depth)
 	if exc != nil {
 		if exc.UpdatePeriod(period) {
-			exc.CancelFunc()
-			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewSpotDepthWorker(exc.Ctx, a.data, exc.SpotApi, exchange, exc.Pair, exc.Period)
+			exc.Cancel()
+			ctx := exc.NewSubContext(a.ctx)
+			go worker.NewSpotDepthWorker(ctx, a.data, exc.SpotApi, exchange, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Depth)
 		if c != nil {
-			go worker.NewSpotDepthWorker(c.Ctx, a.data, c.SpotApi, exchange, c.Pair, c.Period)
+			a.addTimer(keyGen(exchange, pair, DataFlag_Depth))
+			go worker.NewSpotDepthWorker(c.Context(), a.data, c.SpotApi, exchange, c.Pair, c.Period)
 		}
 	}
 	return &Response{
@@ -123,17 +122,18 @@ func (a *Api) SubscribeSpotTicker(exchange, pair string, period int64) *Response
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
-	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Ticker)
+	exc := a.cfg.FindConfig(exchange, pair, DataFlag_Ticker)
 	if exc != nil {
 		if exc.UpdatePeriod(period) {
-			exc.CancelFunc()
-			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewSpotTickerWorker(exc.Ctx, a.data, exc.SpotApi, exchange, exc.Pair, exc.Period)
+			exc.Cancel()
+			ctx := exc.NewSubContext(a.ctx)
+			go worker.NewSpotTickerWorker(ctx, a.data, exc.SpotApi, exchange, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Ticker)
 		if c != nil {
-			go worker.NewSpotTickerWorker(c.Ctx, a.data, c.SpotApi, exchange, c.Pair, c.Period)
+			a.addTimer(keyGen(exchange, pair, DataFlag_Ticker))
+			go worker.NewSpotTickerWorker(c.Context(), a.data, c.SpotApi, exchange, c.Pair, c.Period)
 		}
 	}
 	return &Response{
@@ -144,7 +144,6 @@ func (a *Api) SubscribeSpotTicker(exchange, pair string, period int64) *Response
 // future
 
 func (a *Api) GetFutureDepth(exchange, contractType, pair string) *Response {
-	a.logger.Debugf("GetFutureDepth %s %s", exchange, pair)
 
 	if !validateFuture(exchange) {
 		return &Response{
@@ -152,13 +151,16 @@ func (a *Api) GetFutureDepth(exchange, contractType, pair string) *Response {
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
+	a.resetTimer(futureKeyGen(exchange, contractType, pair, DataFlag_Depth))
 	depth, err := a.data.GetFutureTicker(exchange, contractType, pair)
 	if err != nil {
+		a.logger.Debugf("GetFutureDepth %s %s %s err:%v", exchange, contractType, pair, err)
 		return &Response{
 			Status:       -1,
 			ErrorMessage: err.Error(),
 		}
 	}
+	a.logger.Debugf("GetFutureDepth %s %s success", exchange, pair)
 	return &Response{
 		Status: 0,
 		Data:   depth,
@@ -173,13 +175,16 @@ func (a *Api) GetFutureTicker(exchange, contractType, pair string) *Response {
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
+	a.resetTimer(futureKeyGen(exchange, contractType, pair, DataFlag_Ticker))
 	ticker, err := a.data.GetFutureTicker(exchange, contractType, pair)
 	if err != nil {
+		a.logger.Debugf("GetFutureTicker %s %s %s err:%v", exchange, contractType, pair, err)
 		return &Response{
 			Status:       -1,
 			ErrorMessage: err.Error(),
 		}
 	}
+	a.logger.Debugf("GetFutureTicker %s %s success", exchange, pair)
 	return &Response{
 		Status: 0,
 		Data:   ticker,
@@ -194,17 +199,18 @@ func (a *Api) SubscribeFutureDepth(exchange, contractType, pair string, period i
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
-	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Depth)
+	exc := a.cfg.FindConfig(exchange, pair, DataFlag_Depth)
 	if exc != nil {
 		if exc.UpdatePeriod(period) {
-			exc.CancelFunc()
-			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewFutureDepthWorker(exc.Ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
+			exc.Cancel()
+			ctx := exc.NewSubContext(a.ctx)
+			go worker.NewFutureDepthWorker(ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Depth)
 		if c != nil {
-			go worker.NewFutureDepthWorker(c.Ctx, a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
+			a.addTimer(futureKeyGen(exchange, contractType, pair, DataFlag_Depth))
+			go worker.NewFutureDepthWorker(c.Context(), a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
 		}
 	}
 	return &Response{
@@ -220,35 +226,24 @@ func (a *Api) SubscribeFutureTicker(exchange, contractType, pair string, period 
 			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
 		}
 	}
-	exc := a.cfg.FindConfig(exchange, pair, period, DataFlag_Ticker)
+	exc := a.cfg.FindConfig(exchange, pair, DataFlag_Ticker)
 	if exc != nil {
 		if exc.UpdatePeriod(period) {
-			exc.CancelFunc()
-			exc.Ctx, exc.CancelFunc = context.WithCancel(a.ctx)
-			go worker.NewFutureTickerWorker(exc.Ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
+			exc.Cancel()
+			ctx := exc.NewSubContext(a.ctx)
+			go worker.NewFutureTickerWorker(ctx, a.data, exc.FutureApi, exchange, contractType, exc.Pair, exc.Period)
 		}
 	} else {
 		c := a.cfg.AddConfig(a.ctx, exchange, pair, period, DataFlag_Ticker)
 		if c != nil {
-			go worker.NewFutureTickerWorker(c.Ctx, a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
+			a.addTimer(futureKeyGen(exchange, contractType, pair, DataFlag_Ticker))
+			go worker.NewFutureTickerWorker(c.Context(), a.data, c.FutureApi, exchange, contractType, c.Pair, c.Period)
 		}
 	}
 	return &Response{
 		Status: 0,
 	}
 }
-
-//
-//func (a *Api) SubscribeTrade(exchange, pair string, period int64) *Response {
-//	a.logger.Infof("SubscribeTrade %s %s %d", exchange, pair, period)
-//	if !validate(exchange) {
-//		return &Response{
-//			Status:       -1,
-//			ErrorMessage: fmt.Sprintf(ErrMsg_ExchangeNotSupport, exchange),
-//		}
-//	}
-//	panic("not support yet")
-//}
 
 func validateSpot(exchangeName string) bool {
 	for _, ex := range SpotList {

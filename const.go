@@ -49,3 +49,33 @@ const (
 
 	//DataFlag_All = DataFlag_Depth | DataFlag_Ticker | DataFlag_Trade | DataFlag_Kline
 )
+
+func (df DataFlag) String() string {
+	switch df {
+	case DataFlag_Depth:
+		return "depth"
+	case DataFlag_Ticker:
+		return "ticker"
+	case DataFlag_Trade:
+		return "trade"
+	case DataFlag_Kline:
+		return "kline"
+	default:
+		return "unknown"
+	}
+}
+
+func ParseDataFlag(str string) DataFlag {
+	switch str {
+	case "depth":
+		return DataFlag_Depth
+	case "ticker":
+		return DataFlag_Ticker
+	case "trade":
+		return DataFlag_Trade
+	case "kline":
+		return DataFlag_Kline
+	default:
+		return 0
+	}
+}

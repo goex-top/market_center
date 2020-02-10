@@ -35,7 +35,7 @@ func AdjustGoMaxProcs() {
 
 func init() {
 	AdjustGoMaxProcs()
-	Ctx, _ = context.WithCancel(context.Background())
+	Ctx, Cancel = context.WithCancel(context.Background())
 	Cfg = config.NewConfig()
 	Data = data.NewData()
 	Api = api.NewApi(Ctx, Cfg, Data)
