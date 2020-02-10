@@ -45,6 +45,9 @@ func updateSportDepth(depthData *data.Data, api goex.API, exchange string, pair 
 		if dep.BidList[0].Price < dep.BidList[1].Price {
 			sort.Sort(sort.Reverse(dep.AskList))
 		}
+		if dep.UTime.IsZero() {
+			dep.UTime = time.Now()
+		}
 		depthData.UpdateSpotDepth(exchange, pair.String(), dep)
 	}
 }
@@ -68,6 +71,9 @@ func updateFutureDepth(depthData *data.Data, api goex.FutureRestAPI, exchange, c
 		}
 		if dep.BidList[0].Price < dep.BidList[1].Price {
 			sort.Sort(sort.Reverse(dep.AskList))
+		}
+		if dep.UTime.IsZero() {
+			dep.UTime = time.Now()
 		}
 		depthData.UpdateFutureDepth(exchange, contactType, pair.String(), dep)
 	}
