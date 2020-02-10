@@ -6,7 +6,7 @@ A center to collect market data from cryptocurrency exchanges and distribute it 
 ## NOT Support Windows
 
 ## Why market center
-Some exchanges has limitation for rest api, limit access frequency by IP or Account.
+Some exchanges has limitation for **REST** api, limit access frequency by IP or Account.
 
 Usually we start some strategies in one server(description followed), Exchange 2 maybe ban your server IP because too many request.
 
