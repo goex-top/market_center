@@ -3,7 +3,7 @@ package worker
 import (
 	"context"
 	"github.com/goex-top/market_center/data"
-	goex "github.com/nntaoli-project/GoEx"
+	"github.com/nntaoli-project/goex"
 	log "github.com/sirupsen/logrus"
 	"sort"
 	"time"

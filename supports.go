@@ -1,6 +1,6 @@
 package market_center
 
-import goex "github.com/nntaoli-project/GoEx"
+import "github.com/nntaoli-project/goex"
 
 var (
 	FutureList = []string{
