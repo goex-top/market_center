@@ -1,8 +1,8 @@
 module github.com/goex-top/market_center
 
-go 1.13
+go 1.12
 
 require (
-	github.com/nntaoli-project/goex v1.0.9-0.20200226142801-215edd0592fc
+	github.com/nntaoli-project/goex v1.1.0
 	github.com/sirupsen/logrus v1.4.2
 )

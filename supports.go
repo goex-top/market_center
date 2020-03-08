@@ -10,6 +10,7 @@ var (
 		goex.HBDM,
 		goex.COINBENE,
 		goex.FMEX,
+		goex.BINANCE_SWAP,
 	}
 	SpotList = []string{
 		goex.POLONIEX,
