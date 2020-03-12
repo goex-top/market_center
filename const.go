@@ -51,18 +51,24 @@ const (
 )
 
 func (df DataFlag) String() string {
-	switch df {
-	case DataFlag_Depth:
-		return "depth"
-	case DataFlag_Ticker:
-		return "ticker"
-	case DataFlag_Trade:
-		return "trade"
-	case DataFlag_Kline:
-		return "kline"
-	default:
+	s := ""
+	if df&DataFlag_Depth == DataFlag_Depth {
+		s += "depth, "
+	}
+	if df&DataFlag_Ticker == DataFlag_Ticker {
+		s += "ticker, "
+	}
+	if df&DataFlag_Trade == DataFlag_Trade {
+		s += "trade, "
+	}
+	if df&DataFlag_Kline == DataFlag_Kline {
+		s += "kline, "
+	}
+	if len(s) == 0 {
 		return "unknown"
 	}
+	s = s[:(len(s) - 2)]
+	return s
 }
 
 func ParseDataFlag(str string) DataFlag {
