@@ -55,7 +55,7 @@ func (c *Config) AddConfig(parentCtx context.Context, exchange, pair string, per
 			}
 			if !IsFutureExchange(exchange) {
 				c.ExchangesConfig[k].Pair = append(c.ExchangesConfig[k].Pair, PairConfig{
-					SpotApi:    builder.NewAPIBuilder().HttpProxy(proxy).Build(exchange),
+					SpotApi:    builder.NewAPIBuilder().HttpProxy(proxy).Build(SupportAdapter[exchange]),
 					FutureApi:  nil,
 					Pair:       goex.NewCurrencyPair2(pair),
 					Period:     time.Duration(period * int64(time.Millisecond)),
@@ -66,7 +66,7 @@ func (c *Config) AddConfig(parentCtx context.Context, exchange, pair string, per
 				})
 			} else {
 				c.ExchangesConfig[k].Pair = append(c.ExchangesConfig[k].Pair, PairConfig{
-					FutureApi:  builder.NewAPIBuilder().HttpProxy(proxy).BuildFuture(exchange),
+					FutureApi:  builder.NewAPIBuilder().HttpProxy(proxy).BuildFuture(SupportAdapter[exchange]),
 					SpotApi:    nil,
 					Pair:       goex.NewCurrencyPair2(pair),
 					Period:     time.Duration(period * int64(time.Millisecond)),
@@ -82,7 +82,7 @@ func (c *Config) AddConfig(parentCtx context.Context, exchange, pair string, per
 	var pc PairConfig
 	if !IsFutureExchange(exchange) {
 		pc = PairConfig{
-			SpotApi:    builder.NewAPIBuilder().HttpProxy(proxy).Build(exchange),
+			SpotApi:    builder.NewAPIBuilder().HttpProxy(proxy).Build(SupportAdapter[exchange]),
 			FutureApi:  nil,
 			Pair:       goex.NewCurrencyPair2(pair),
 			Period:     time.Duration(period * int64(time.Millisecond)),
@@ -93,7 +93,7 @@ func (c *Config) AddConfig(parentCtx context.Context, exchange, pair string, per
 		}
 	} else {
 		pc = PairConfig{
-			FutureApi:  builder.NewAPIBuilder().HttpProxy(proxy).BuildFuture(exchange),
+			FutureApi:  builder.NewAPIBuilder().HttpProxy(proxy).BuildFuture(SupportAdapter[exchange]),
 			SpotApi:    nil,
 			Pair:       goex.NewCurrencyPair2(pair),
 			Period:     time.Duration(period * int64(time.Millisecond)),
