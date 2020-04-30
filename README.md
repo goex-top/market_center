@@ -42,30 +42,28 @@ params
 
 ## Support Exchanges
 ### SPOT
-* poloniex.com
-* bitstamp.net
-* huobi.pro
-* bitfinex.com
-* okex.com_v3
-* binance.com
-* bittrex.com
-* bithumb.com
-* gdax.com
-* gate.io
-* coinex.com
-* zb.com
-* fcoin.com
-* fcoin.com_margin
-* big.one
-* hitbtc.com
+* Poloniex
+* Bitstamp
+* Huobi
+* Bitfinex
+* Okex
+* Binance
+* Bittrex
+* Bithumb
+* Gdax
+* Gate
+* Coinex
+* Zb
+* Bigone
+* Hitbtc
 
 ### FUTURE
-* bitmex.com
-* okex.com_future
-* okex.com_swap
-* hbdm.com
-* coinbene.com
-* fmex.com
+* Future_Bitmex
+* Future_Okex
+* Swap_Okex
+* Future_Hbdm
+* Swap_Binance
+* Future_Coinbene
 
 ## Proxy
 

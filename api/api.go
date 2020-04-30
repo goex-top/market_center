@@ -33,7 +33,7 @@ func (a *Api) GetSupportList() *Response {
 	a.logger.Debugln("GetSupportList")
 	return &Response{
 		Status: 0,
-		Data:   append(SpotList, FutureList...),
+		Data:   SupportList,
 	}
 }
 
@@ -246,18 +246,20 @@ func (a *Api) SubscribeFutureTicker(exchange, contractType, pair string, period 
 }
 
 func validateSpot(exchangeName string) bool {
-	for _, ex := range SpotList {
-		if ex == exchangeName {
-			return true
-		}
-	}
-	return false
+	//for _, ex := range SpotList {
+	//	if ex == exchangeName {
+	//		return true
+	//	}
+	//}
+	//return false
+	return !IsFutureExchange(exchangeName)
 }
 func validateFuture(exchangeName string) bool {
-	for _, ex := range FutureList {
-		if ex == exchangeName {
-			return true
-		}
-	}
-	return false
+	//for _, ex := range FutureList {
+	//	if ex == exchangeName {
+	//		return true
+	//	}
+	//}
+	//return false
+	return IsFutureExchange(exchangeName)
 }
